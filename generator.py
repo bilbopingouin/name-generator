@@ -11,7 +11,7 @@ def arguments():
     path = os.path.dirname(__file__)
     if not path:
         path = '.'
-    def_indir=path+'/inputs/'
+    def_indir = path+'/inputs/'
 
     parser = argparse.ArgumentParser(description='Name generator')
 
@@ -19,8 +19,14 @@ def arguments():
                         action='store_true', required=False)
     parser.add_argument('-n', '--number-of-names',
                         help='Number of names [default: 1]', type=int, default=1, required=False)
-    parser.add_argument('-i', '--input-directory', help='Where would the list of files be found [default: '+def_indir+']',type=str, default=def_indir, required=False)
-    parser.add_argument('-d', '--debug', help='Print some debug message [default: false]', action='store_true', required=False)
+    parser.add_argument('-i', '--input-directory',
+                        help='Where would the list of files be found [default: '+def_indir+']', type=str, default=def_indir, required=False)
+    parser.add_argument(
+        '-d', '--debug', help='Print some debug message [default: false]', action='store_true', required=False)
+    parser.add_argument('-f', '--first-only', help='Povide a first (given) name  only',
+                        action='store_true', required=False)
+    parser.add_argument('-l', '--last-only', help='Povide a last name (surname) only',
+                        action='store_true', required=False)
 
     try:
         options = parser.parse_args()
@@ -61,8 +67,13 @@ def arguments():
         if parameters['debug']:
             print('Using input directory: '+options.input_directory)
     else:
-        stderr.write('Error: input directory does not exists: '+options.input_directory)
+        stderr.write('Error: input directory does not exists: ' +
+                     options.input_directory)
         sys.exit(1)
+
+    # Selections
+    parameters['first only'] = options.first_only
+    parameters['last only'] = options.last_only
 
     return parameters
 
@@ -76,6 +87,7 @@ def get_list_from_file(filename):
             out.add(line)
         f.close()
     return out
+
 
 def get_list_from_list_of_files(pattern, debug=False):
     out = set()
@@ -95,7 +107,8 @@ def get_lists(dirname, debug=False):
     ''' Get the different lists '''
 
     # Female lists
-    female_first_name = get_list_from_list_of_files(dirname+'female_first_names_*.dat', debug)
+    female_first_name = get_list_from_list_of_files(
+        dirname+'female_first_names_*.dat', debug)
 
     # Male lists
     male_first_name = get_list_from_list_of_files(
@@ -109,7 +122,7 @@ def get_lists(dirname, debug=False):
 
 def pick_one_from_set(setname):
     ''' Select a single element from a set '''
-    if len(setname)>0:
+    if len(setname) > 0:
         return sample(setname, 1).pop().rstrip('\n')
     else:
         return ''
@@ -122,10 +135,15 @@ if __name__ == '__main__':
     (femfirst, mfirst, surnames) = get_lists(args['idir'], args['debug'])
 
     for n in range(args['nnames']):
-        if args['ismale']:
-            fname = pick_one_from_set(mfirst)
-        else:
-            fname = pick_one_from_set(femfirst)
-        lname = pick_one_from_set(surnames)
+        fname = ''
+        lname = ''
+
+        if not args['last only']:
+            if args['ismale']:
+                fname = pick_one_from_set(mfirst)
+            else:
+                fname = pick_one_from_set(femfirst)
+        if not args['first only']:
+            lname = pick_one_from_set(surnames)
 
         print(fname, lname)

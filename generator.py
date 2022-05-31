@@ -123,7 +123,7 @@ def get_lists(dirname, debug=False):
 def pick_one_from_set(setname):
     ''' Select a single element from a set '''
     if len(setname) > 0:
-        return sample(setname, 1).pop().rstrip('\n')
+        return sample(list(setname), 1).pop().rstrip('\n')
     else:
         return ''
 
